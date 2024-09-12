@@ -1,6 +1,6 @@
 # cli_tool.py
 import argparse
-from api_utils import get_packages, print_packages, get_architectures, compare_packages
+from api_utils import get_packages, print_packages, get_architectures, compare_packages, compare_versions_and_releases
 
 branch1 = None
 branch2 = None
@@ -23,20 +23,20 @@ def main() -> None:
     branch1 = args.branch1
     branch2 = args.branch2
 
-    packages1 = get_packages(branch1)
-    packages2 = get_packages(branch2)
+    #packages1 = get_packages(branch1)
+    #packages2 = get_packages(branch2)
 
-    print_packages(branch1, packages1)
-    print()
-    print_packages(branch2, packages2)
-
-    print(f"Все возможные архитектуры для ветки {branch1}:")
-    architectures1 = get_architectures(branch1)
-    print(', '.join(architectures1))
-
-    print(f"\nВсе возможные архитектуры для ветки {branch2}:")
-    architectures2 = get_architectures(branch2)
-    print(', '.join(architectures2))
+    # print_packages(branch1, packages1)
+    # print()
+    # print_packages(branch2, packages2)
+    #
+    # print(f"Все возможные архитектуры для ветки {branch1}:")
+    # architectures1 = get_architectures(branch1)
+    # print(', '.join(architectures1))
+    #
+    # print(f"\nВсе возможные архитектуры для ветки {branch2}:")
+    # architectures2 = get_architectures(branch2)
+    # print(', '.join(architectures2))
 
 
 def menu():
@@ -46,11 +46,12 @@ def menu():
         print("\nМеню:")
         print("1. Выбрать архитектуру")
         print("2. Пакеты, отсутствующие во 2 ветке")
-        print("3. Опция 3")
-        print("4. Опция 4")
-        print("5. Выход")
+        print("3. Пакеты, отсутствующие в 1 ветке")
+        print("4. Пакеты, version-release которых выше в 1 ветке")
+        print("5. Пакеты, version-release которых выше во 2 ветке")
+        print("6. Выход")
 
-        choice = input("Выберите опцию (1-5): ")
+        choice = input("Выберите опцию (1-6): ")
 
         if choice == '1':
             architectures1 = get_architectures(branch1)
@@ -83,18 +84,36 @@ def menu():
                 print("Сначала выберите архитектуру в пункте 1.")
                 continue
 
-            missing_packages = compare_packages(branch1, branch2, selected_arch)
+            missing_packages = compare_packages(branch1, branch2, selected_arch, 1)
             print("\nПакеты, которые есть в первой ветке, но отсутствуют во второй:")
             for pkg in missing_packages:
                 print(f"- {pkg['name']} {pkg['version']}-{pkg['release']} {pkg['arch']}")
 
         elif choice == '3':
-            print("Опция 3 пока не реализована.")
+            if not selected_arch:
+                print("Сначала выберите архитектуру в пункте 1.")
+                continue
+
+            missing_packages_reverse = compare_packages(branch2, branch1, selected_arch, 0)
+            print("\nПакеты, которые есть во второй ветке, но отсутствуют в первой:")
+            for pkg in missing_packages_reverse:
+                print(f"- {pkg['name']} {pkg['version']}-{pkg['release']} {pkg['arch']}")
 
         elif choice == '4':
-            print("Опция 4 пока не реализована.")
+            if not selected_arch:
+                print("Архитектура не выбрана. Сначала выберите архитектуру в пункте 1.")
+                continue
+            compare_versions_and_releases(branch1, branch2, selected_arch, 1)
+
 
         elif choice == '5':
+            if not selected_arch:
+                print("Архитектура не выбрана. Сначала выберите архитектуру в пункте 1.")
+                continue
+            compare_versions_and_releases(branch2, branch1, selected_arch, 0)
+
+
+        elif choice == '6':
             print("Выход из программы.")
             break
 
