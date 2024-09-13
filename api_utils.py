@@ -1,9 +1,8 @@
-# api_utils.py
 import requests
 import json
 import os
 import re
-# get packages from branch
+
 def get_packages(branch: str) -> list:
     url = f"https://rdb.altlinux.org/api/export/branch_binary_packages/{branch}"
     try:
@@ -15,17 +14,15 @@ def get_packages(branch: str) -> list:
         else:
             return data
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при запросе данных для ветки {branch}: {e}")
+        print(f"Error when requesting data for a branch {branch}: {e}")
         return []
 
-# print 50 packages
 def print_packages(branch: str, packages: list) -> None:
-    print(f"Пакеты для ветки {branch}:")
+    print(f"Packages for the branch {branch}:")
     filtered_packages = [pkg for pkg in packages if pkg['arch'] != 'aarch64']
     for package in filtered_packages[:10]:
         print(f"- {package['name']} {package['version']}-{package['release']} {package['arch']}")
 
-# get all arch from branch
 def get_architectures(branch: str) -> set:
     packages = get_packages(branch)
     architectures = {pkg['arch'] for pkg in packages if isinstance(pkg, dict) and 'arch' in pkg}
@@ -49,9 +46,9 @@ def compare_packages(branch1: str, branch2: str, arch: str, flag: int) -> list:
     try:
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(packages_only_in_branch1, file, ensure_ascii=False, indent=4)
-        print(f"Результаты сохранены в файл: {filename}")
+        print(f"The results are saved to a file: {filename}")
     except IOError as e:
-        print(f"Ошибка при сохранении файла: {e}")
+        print(f"Error saving the file: {e}")
 
     return packages_only_in_branch1
 
@@ -88,9 +85,9 @@ def compare_versions_and_releases(branch1: str, branch2: str, arch: str, flag: i
     try:
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(higher_version_packages, file, ensure_ascii=False, indent=4)
-        print(f"Результаты сохранены в файл: {filename}")
+        print(f"The results are saved to a file: {filename}")
     except IOError as e:
-        print(f"Ошибка при сохранении файла: {e}")
+        print(f"Error saving the file: {e}")
 
     return higher_version_packages
 
