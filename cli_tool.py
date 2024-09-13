@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 from api_utils import get_architectures, compare_packages, compare_versions_and_releases
 
