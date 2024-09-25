@@ -1,15 +1,20 @@
 #!/bin/bash
 
+if [[ $EUID -ne 0 ]]; then
+   echo "Please, start with sudo."
+   exit 1
+fi
+
 echo "Installing dependencies..."
-sudo apt-get update
-sudo apt-get install -y python3-requests
+apt-get update
+apt-get install -y python3-module-requests
 
 echo "Moving scripts to appropriate directories..."
-sudo cp api_utils.py /usr/lib/python3/site-packages/
-sudo cp cli_tool.py /usr/local/bin/pythonCLI
+cp api_utils.py /usr/lib/python3/site-packages/
+cp cli_tool.py /usr/local/bin/pythonCLI
 
 echo "Making the main script executable..."
-sudo chmod +x /usr/local/bin/pythonCLI
+chmod +x /usr/local/bin/pythonCLI
 
 echo "Installation complete."
 
