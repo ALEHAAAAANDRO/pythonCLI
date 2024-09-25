@@ -36,7 +36,14 @@ def compare_packages(branch1: str, branch2: str, arch: str, flag: int) -> list:
     packages1 = get_packages_arch(branch1, arch)
     packages2 = get_packages_arch(branch2, arch)
 
-    packages_only_in_branch1 = [pkg for pkg in packages1 if pkg['name'] not in {p['name'] for p in packages2}]
+    packages2_dict = {pkg['name']: pkg for pkg in packages2}
+
+    packages_only_in_branch1 = []
+
+    for pkg1 in packages1:
+        pkg2 = packages2_dict.get(pkg1['name'])
+        if not pkg2:
+            packages_only_in_branch1.append(pkg1)
 
     if flag == 1:
         filename = os.path.expanduser("~/missing_packages_from_second_branch.json")
@@ -65,17 +72,9 @@ def compare_versions_and_releases(branch1: str, branch2: str, arch: str, flag: i
         if not pkg2:
             continue
 
-        version1_numbers = extract_numbers(pkg1['version'])
-        version2_numbers = extract_numbers(pkg2['version'])
-
-        if version1_numbers > version2_numbers:
+        if compare_versions_with_mixed_segments(pkg1.get('epoch', '0'), pkg1['version'], pkg1['release'],
+                                                pkg2.get('epoch', '0'), pkg2['version'], pkg2['release']):
             higher_version_packages.append(pkg1)
-        elif version1_numbers == version2_numbers:
-            release1_numbers = extract_numbers(pkg1['release'])
-            release2_numbers = extract_numbers(pkg2['release'])
-
-            if release1_numbers > release2_numbers:
-                higher_version_packages.append(pkg1)
 
     if flag == 1:
         filename = os.path.expanduser("~/higher_version_packages_in_first_br.json")
@@ -91,6 +90,42 @@ def compare_versions_and_releases(branch1: str, branch2: str, arch: str, flag: i
 
     return higher_version_packages
 
-def extract_numbers(text: str) -> tuple:
-    numbers = re.findall(r'\d+', text)
-    return tuple(map(int, numbers))
+def compare_versions_with_mixed_segments(epoch1, version1, release1, epoch2, version2, release2):
+    if epoch1 != epoch2:
+        return int(epoch1) > int(epoch2)
+
+    version1_segments = split_version_to_segments(version1)
+    version2_segments = split_version_to_segments(version2)
+
+    version_comparison = compare_segments(version1_segments, version2_segments)
+    if version_comparison != 0:
+        return version_comparison > 0
+
+    release1_segments = split_version_to_segments(release1)
+    release2_segments = split_version_to_segments(release2)
+
+    return compare_segments(release1_segments, release2_segments) > 0
+
+
+def split_version_to_segments(version: str) -> list:
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', version) if s]
+
+def compare_segments(segments1, segments2):
+    for seg1, seg2 in zip(segments1, segments2):
+        if type(seg1) == type(seg2):
+            if seg1 > seg2:
+                return 1
+            elif seg1 < seg2:
+                return -1
+        else:
+            if isinstance(seg1, int):
+                return -1
+            else:
+                return 1
+
+    if len(segments1) > len(segments2):
+        return 1
+    elif len(segments1) < len(segments2):
+        return -1
+
+    return 0
