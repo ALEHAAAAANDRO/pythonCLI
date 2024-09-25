@@ -25,34 +25,12 @@ git clone https://github.com/ALEHAAAAANDRO/pythonCLI.git
 cd pythonCLI
 ```
 
-### Step 2: Install Dependencies
+### Step 2: Install
 
 
 ```bash
-apt-get install python3-module-requests
+sudo ./install.sh
 ```
-
-### Step 3: System Installation
-
-To install the script perform the following steps:
-
-1. **Move scripts to the appropriate directories:**
-
-   - Move `api_utils.py` to `/usr/lib/python3/site-packages/`
-   - Move `cli_tool.py` to `/usr/local/bin/`
-
-   Use the following commands:
-
-   ```bash
-   sudo cp api_utils.py /usr/lib/python3/site-packages/
-   sudo cp cli_tool.py /usr/local/bin/pythonCLI
-   ```
-
-2. **Make the main script executable:**
-
-   ```bash
-   sudo chmod +x /usr/local/bin/pythonCLI
-   ```
 
 ## Usage
 
